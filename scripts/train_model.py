@@ -2,8 +2,8 @@
 modelName = 'speechBaseline4'
 
 args = {}
-args['outputDir'] = '/oak/stanford/groups/henderj/stfan/logs/speech_logs/' + modelName
-args['datasetPath'] = '/oak/stanford/groups/henderj/fwillett/speech/ptDecoder_ctc'
+args['outputDir'] = '/home/langone/bci/outdir/' + modelName
+args['datasetPath'] = '/home/langone/bci/data/dataset'
 args['seqLen'] = 150
 args['maxTimeSeriesLen'] = 1200
 args['batchSize'] = 64
@@ -21,9 +21,9 @@ args['constantOffsetSD'] = 0.2
 args['gaussianSmoothWidth'] = 2.0
 args['strideLen'] = 4
 args['kernelLen'] = 32
-args['bidirectional'] = True
+args['bidirectional'] = False
 args['l2_decay'] = 1e-5
 
 from neural_decoder.neural_decoder_trainer import trainModel
-
+import torch
 trainModel(args)

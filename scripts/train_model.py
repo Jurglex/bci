@@ -2,8 +2,8 @@
 modelName = 'speechBaseline4'
 
 args = {}
-args['outputDir'] = '/oak/stanford/groups/henderj/stfan/logs/speech_logs/' + modelName
-args['datasetPath'] = '/oak/stanford/groups/henderj/fwillett/speech/ptDecoder_ctc'
+args['outputDir'] = '/lotterlab/users/alex/repos/bci/output/' + modelName
+args['datasetPath'] = '/lotterlab/users/alex/repos/bci/data/dataset.pkl'
 args['seqLen'] = 150
 args['maxTimeSeriesLen'] = 1200
 args['batchSize'] = 64

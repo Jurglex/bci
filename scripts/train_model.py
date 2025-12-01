@@ -1,9 +1,21 @@
 
 modelName = 'speechBaseline4'
 
+import json
+from pathlib import Path
+
+def load_paths(config_name: str = "paths.json") -> dict:
+    # Resolve paths.json relative to this file
+    config_path = Path(__file__).resolve().parent / config_name
+    with config_path.open() as f:
+        return json.load(f)
+
+
 args = {}
-args['outputDir'] = '/home/langone/bci/outdir/' + modelName
-args['datasetPath'] = '/home/langone/bci/data/dataset'
+paths = load_paths()
+
+args['outputDir'] = str(Path(paths['outputDirBase']) / modelName)
+args['datasetPath'] = paths['datasetPath']
 args['seqLen'] = 150
 args['maxTimeSeriesLen'] = 1200
 args['batchSize'] = 64

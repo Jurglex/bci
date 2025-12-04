@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader
 
 from .model import GRUDecoder
 from .dataset import SpeechDataset
+from .smoothCTC import LabelSmoothingCTCLoss
 
 
 def getDatasetLoaders(
@@ -83,7 +84,7 @@ def trainModel(args):
         bidirectional=args["bidirectional"],
     ).to(device)
 
-    loss_ctc = torch.nn.CTCLoss(blank=0, reduction="mean", zero_infinity=True)
+    loss_ctc = LabelSmoothingCTCLoss(blank=0, reduction="mean", zero_infinity=True,smoothing=0.1)
     optimizer = torch.optim.Adam(
         model.parameters(),
         lr=args["lrStart"],

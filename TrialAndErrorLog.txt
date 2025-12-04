@@ -2,3 +2,5 @@ Decreasing nUnits to 256: 3x faster, slightly worse  B100 cer=0.561
 Decreasing learning rate made it worse
 Decreasing dropout to 0.2 made it better: cer=0.543766 --> 0.1 cer: 0.533944 --> 0.05 cer: 0.531550 --> 0.025 0.530106
 Decreasing nLayers to 4 made it better: cer: 0.506541 --> 3 cer: 0.481284 --> 2 cer: 0.477240 --> 1 cer: 0.492798
+batch 9200, ctc loss: 0.947883, cer: 0.255293,  dropout 0.1 and nLayers=3
+Smooth loss makes model apparently better, but also slower (similar speed as original if we do nBatches=1024)

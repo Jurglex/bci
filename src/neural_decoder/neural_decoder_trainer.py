@@ -91,21 +91,108 @@ def trainModel(args):
         eps=0.1,
         weight_decay=args["l2_decay"],
     )
-    scheduler = torch.optim.lr_scheduler.LinearLR(
-        optimizer,
-        start_factor=1.0,
-        end_factor=args["lrEnd"] / args["lrStart"],
-        total_iters=args["nBatch"],
-    )
+    scheduler_type = args["lr_scheduler"] if ("lr_scheduler" in args) else "linear"
+    scheduler = None
+    onecycle_scheduler = None
+    warmup_scheduler = None
+    plateau_scheduler = None
+    warmup_steps = 0
+    if scheduler_type == "linear":
+        scheduler = torch.optim.lr_scheduler.LinearLR(
+            optimizer,
+            start_factor=1.0,
+            end_factor=args["lrEnd"] / args["lrStart"],
+            total_iters=args["nBatch"],
+        )
+    elif scheduler_type == "plateau":
+        lr_factor = args["lr_factor"] if ("lr_factor" in args) else 0.5
+        lr_patience = args["lr_patience"] if ("lr_patience" in args) else 5
+        lr_threshold = args["lr_threshold"] if ("lr_threshold" in args) else 1e-3
+        lr_threshold_mode = (
+            args["lr_threshold_mode"] if ("lr_threshold_mode" in args) else "rel"
+        )
+        lr_cooldown = args["lr_cooldown"] if ("lr_cooldown" in args) else 0
+        lr_min = args["lr_min"] if ("lr_min" in args) else 1e-6
+        lr_eps = args["lr_eps"] if ("lr_eps" in args) else 1e-8
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer,
+            mode="min",
+            factor=lr_factor,
+            patience=lr_patience,
+            threshold=lr_threshold,
+            threshold_mode=lr_threshold_mode,
+            cooldown=lr_cooldown,
+            min_lr=lr_min,
+            eps=lr_eps,
+            verbose=False,
+        )
+    elif scheduler_type == "two_phase":
+        phase1_pct = args["phase1_pct"] if ("phase1_pct" in args) else 0.4
+        warmup_steps = int(args["nBatch"] * phase1_pct)
+        if warmup_steps < 1:
+            warmup_steps = 1
+        if warmup_steps >= args["nBatch"]:
+            warmup_steps = args["nBatch"] - 1
+        phase1_mode = args["phase1_mode"] if ("phase1_mode" in args) else "onecycle"
+        if phase1_mode == "onecycle":
+            max_lr = args["onecycle_max_lr"] if ("onecycle_max_lr" in args) else args["lrStart"]
+            div_factor = args["onecycle_div_factor"] if ("onecycle_div_factor" in args) else 10
+            final_div_factor = (
+                args["onecycle_final_div_factor"] if ("onecycle_final_div_factor" in args) else 100
+            )
+            pct_start = args["onecycle_pct_start"] if ("onecycle_pct_start" in args) else 0.1
+            onecycle_scheduler = torch.optim.lr_scheduler.OneCycleLR(
+                optimizer,
+                max_lr=max_lr,
+                total_steps=warmup_steps,
+                pct_start=pct_start,
+                div_factor=div_factor,
+                final_div_factor=final_div_factor,
+                cycle_momentum=False,
+            )
+        else:
+            warmup_start_factor = (
+                args["warmup_start_factor"] if ("warmup_start_factor" in args) else 0.1
+            )
+            warmup_scheduler = torch.optim.lr_scheduler.LinearLR(
+                optimizer,
+                start_factor=warmup_start_factor,
+                total_iters=warmup_steps,
+            )
+        lr_factor = args["lr_factor"] if ("lr_factor" in args) else 0.5
+        lr_patience = args["lr_patience"] if ("lr_patience" in args) else 5
+        lr_threshold = args["lr_threshold"] if ("lr_threshold" in args) else 1e-3
+        lr_threshold_mode = (
+            args["lr_threshold_mode"] if ("lr_threshold_mode" in args) else "rel"
+        )
+        lr_cooldown = args["lr_cooldown"] if ("lr_cooldown" in args) else 0
+        lr_min = args["lr_min"] if ("lr_min" in args) else 1e-6
+        lr_eps = args["lr_eps"] if ("lr_eps" in args) else 1e-8
+        plateau_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer,
+            mode="min",
+            factor=lr_factor,
+            patience=lr_patience,
+            threshold=lr_threshold,
+            threshold_mode=lr_threshold_mode,
+            cooldown=lr_cooldown,
+            min_lr=lr_min,
+            eps=lr_eps,
+            verbose=False,
+        )
 
-    # --train--
     testLoss = []
     testCER = []
     startTime = time.time()
+    train_iter = iter(trainLoader)
     for batch in range(args["nBatch"]):
         model.train()
 
-        X, y, X_len, y_len, dayIdx = next(iter(trainLoader))
+        try:
+            X, y, X_len, y_len, dayIdx = next(train_iter)
+        except StopIteration:
+            train_iter = iter(trainLoader)
+            X, y, X_len, y_len, dayIdx = next(train_iter)
         X, y, X_len, y_len, dayIdx = (
             X.to(device),
             y.to(device),
@@ -139,12 +226,19 @@ def trainModel(args):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        scheduler.step()
+        if scheduler_type == "linear" and scheduler is not None:
+            scheduler.step()
+        elif scheduler_type == "two_phase" and batch < warmup_steps:
+            if onecycle_scheduler is not None:
+                onecycle_scheduler.step()
+            elif warmup_scheduler is not None:
+                warmup_scheduler.step()
 
         # print(endTime - startTime)
 
         # Eval
-        if batch % 100 == 0:
+        evalInterval = args["evalInterval"] if ("evalInterval" in args) else 100
+        if batch % evalInterval == 0:
             with torch.no_grad():
                 model.eval()
                 allLoss = []
@@ -194,9 +288,16 @@ def trainModel(args):
                 avgDayLoss = np.sum(allLoss) / len(testLoader)
                 cer = total_edit_distance / total_seq_length
 
+                if scheduler_type == "plateau" and scheduler is not None:
+                    scheduler.step(cer)
+                elif scheduler_type == "two_phase" and plateau_scheduler is not None and batch >= warmup_steps:
+                    plateau_scheduler.step(cer)
+
                 endTime = time.time()
+                eval_interval = evalInterval
+                curr_lr = optimizer.param_groups[0]["lr"]
                 print(
-                    f"batch {batch}, ctc loss: {avgDayLoss:>7f}, cer: {cer:>7f}, time/batch: {(endTime - startTime)/100:>7.3f}"
+                    f"batch {batch}, lr: {curr_lr:>8.6f}, ctc loss: {avgDayLoss:>7f}, cer: {cer:>7f}, time/batch: {(endTime - startTime)/eval_interval:>7.3f}"
                 )
                 startTime = time.time()
 

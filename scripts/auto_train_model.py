@@ -1,13 +1,7 @@
-"""
-Run One-Variable-At-a-Time (OVAT) tests over:
-nUnits, dropout, lrStart, nLayers, whiteNoiseSD.
-
-Each run changes exactly ONE parameter, all others remain at base_args values.
-"""
-
 import json
 from pathlib import Path
 import copy
+import sys
 from neural_decoder.neural_decoder_trainer import trainModel
 
 modelName = 'speechBaseline4'
@@ -31,7 +25,7 @@ base_args = {
     'lrStart': 0.02,
     'lrEnd': 0.02,
     'nUnits': 1024,
-    'nBatch': 10000,
+    'nBatch': 100,
     'nLayers': 5,
     'seed': 0,
     'nClasses': 40,
@@ -47,9 +41,8 @@ base_args = {
 }
 
 # ----------------------------------------------------------
-# OVAT Hyperparameter Values
+# OVAT hyperparameters
 # ----------------------------------------------------------
-
 sweep = {
     "nUnits":       [256, 512, 1024],
     "dropout":      [0, 0.05, 0.1, 0.2, 0.3],
@@ -59,7 +52,7 @@ sweep = {
 }
 
 # ----------------------------------------------------------
-# Run OVAT Experiments
+# Run OVAT experiments
 # ----------------------------------------------------------
 run_id = 0
 
@@ -69,25 +62,44 @@ for param_name, values in sweep.items():
 
         args = copy.deepcopy(base_args)
 
-        # Change exactly one parameter
+        # Set the modified parameter
         args[param_name] = val
 
-        # Keep lrStart == lrEnd
         if param_name == "lrStart":
             args["lrEnd"] = val
 
-        # Create output folder
+        # Output directory
         run_name = f"OVAT_{param_name}_{val}_run{run_id:03d}"
         args["outputDir"] = str(Path(base_args["outputDir"]) / run_name)
         Path(args["outputDir"]).mkdir(parents=True, exist_ok=True)
 
-        print("\n=====================================")
-        print(f"RUN {run_id}: {param_name} = {val}")
-        print("=====================================")
-        print(json.dumps({
-            "changed_param": param_name,
-            "value": val,
-            "outputDir": args["outputDir"]
-        }, indent=2))
+        # Log file path
+        log_file = Path(args["outputDir"]) / "log.txt"
 
-        trainModel(args)
+        # Print to console and write to log
+        print(f"\n=== RUN {run_id}: {param_name} = {val} ===")
+        print(f"Saving logs to: {log_file}")
+
+        # Redirect stdout & stderr
+        with open(log_file, "w") as f:
+            # Duplicate console + file output
+            sys.stdout = f
+            sys.stderr = f
+
+            print("\n=====================================")
+            print(f"RUN {run_id}: {param_name} = {val}")
+            print("=====================================")
+            print(json.dumps({
+                "changed_param": param_name,
+                "value": val,
+                "outputDir": args["outputDir"]
+            }, indent=2))
+
+            # Run training and capture all printed output
+            trainModel(args)
+
+        # Restore normal stdout
+        sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
+
+        print(f"Finished run {run_id}, logs saved to {log_file}")

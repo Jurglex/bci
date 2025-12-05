@@ -28,7 +28,6 @@ args['seed'] = 0
 args['nClasses'] = 40
 
 args['pairMode'] = 'overlap'  # 'none' | 'overlap' | 'nonoverlap'
-args['decodeMode'] = 'dp'
 args['nPhoneClasses'] = args['nClasses']
 if args['pairMode'] != 'none':
     args['nClasses'] = args['nPhoneClasses'] * args['nPhoneClasses']

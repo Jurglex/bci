@@ -26,12 +26,6 @@ args['nBatch'] = 10000 #3000
 args['nLayers'] = 5
 args['seed'] = 0
 args['nClasses'] = 40
-
-args['pairMode'] = 'overlap'  # 'none' | 'overlap' | 'nonoverlap'
-args['decodeMode'] = 'dp'
-args['nPhoneClasses'] = args['nClasses']
-if args['pairMode'] != 'none':
-    args['nClasses'] = args['nPhoneClasses'] * args['nPhoneClasses']
 args['nInputFeatures'] = 256
 args['dropout'] = 0.4
 args['whiteNoiseSD'] = 0.8

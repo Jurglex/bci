@@ -1,0 +1,129 @@
+
+=====================================
+RUN 1: nUnits = 256
+=====================================
+{
+  "changed_param": "nUnits",
+  "value": 256,
+  "outputDir": "/lotterlab/users/alex/repos/bci/outdir/speechBaseline4/OVAT_nUnits_256_run001"
+}
+batch 0, ctc loss: 5.853552, cer: 0.993686, time/batch:   0.008
+
+=====================================
+RUN 2: nUnits = 512
+=====================================
+{
+  "changed_param": "nUnits",
+  "value": 512,
+  "outputDir": "/lotterlab/users/alex/repos/bci/outdir/speechBaseline4/OVAT_nUnits_512_run002"
+}
+batch 0, ctc loss: 4.961169, cer: 0.991746, time/batch:   0.005
+
+=====================================
+RUN 3: nUnits = 1024
+=====================================
+{
+  "changed_param": "nUnits",
+  "value": 1024,
+  "outputDir": "/lotterlab/users/alex/repos/bci/outdir/speechBaseline4/OVAT_nUnits_1024_run003"
+}
+batch 0, ctc loss: 5.045965, cer: 0.993933, time/batch:   0.006
+
+=====================================
+RUN 4: dropout = 0
+=====================================
+{
+  "changed_param": "dropout",
+  "value": 0,
+  "outputDir": "/lotterlab/users/alex/repos/bci/outdir/speechBaseline4/OVAT_dropout_0_run004"
+}
+batch 0, ctc loss: 4.988011, cer: 0.992489, time/batch:   0.006
+
+=====================================
+RUN 5: dropout = 0.05
+=====================================
+{
+  "changed_param": "dropout",
+  "value": 0.05,
+  "outputDir": "/lotterlab/users/alex/repos/bci/outdir/speechBaseline4/OVAT_dropout_0.05_run005"
+}
+batch 0, ctc loss: 4.998631, cer: 0.992489, time/batch:   0.006
+
+=====================================
+RUN 6: dropout = 0.1
+=====================================
+{
+  "changed_param": "dropout",
+  "value": 0.1,
+  "outputDir": "/lotterlab/users/alex/repos/bci/outdir/speechBaseline4/OVAT_dropout_0.1_run006"
+}
+batch 0, ctc loss: 5.004226, cer: 0.992695, time/batch:   0.006
+
+=====================================
+RUN 7: dropout = 0.2
+=====================================
+{
+  "changed_param": "dropout",
+  "value": 0.2,
+  "outputDir": "/lotterlab/users/alex/repos/bci/outdir/speechBaseline4/OVAT_dropout_0.2_run007"
+}
+batch 0, ctc loss: 5.004551, cer: 0.993191, time/batch:   0.006
+
+=====================================
+RUN 8: dropout = 0.3
+=====================================
+{
+  "changed_param": "dropout",
+  "value": 0.3,
+  "outputDir": "/lotterlab/users/alex/repos/bci/outdir/speechBaseline4/OVAT_dropout_0.3_run008"
+}
+batch 0, ctc loss: 5.012551, cer: 0.993314, time/batch:   0.006
+
+=====================================
+RUN 9: lrStart = 0.005
+=====================================
+{
+  "changed_param": "lrStart",
+  "value": 0.005,
+  "outputDir": "/lotterlab/users/alex/repos/bci/outdir/speechBaseline4/OVAT_lrStart_0.005_run009"
+}
+batch 0, ctc loss: 6.410538, cer: 0.984524, time/batch:   0.006
+
+=====================================
+RUN 10: lrStart = 0.01
+=====================================
+{
+  "changed_param": "lrStart",
+  "value": 0.01,
+  "outputDir": "/lotterlab/users/alex/repos/bci/outdir/speechBaseline4/OVAT_lrStart_0.01_run010"
+}
+batch 0, ctc loss: 5.943045, cer: 0.990591, time/batch:   0.005
+
+=====================================
+RUN 11: lrStart = 0.02
+=====================================
+{
+  "changed_param": "lrStart",
+  "value": 0.02,
+  "outputDir": "/lotterlab/users/alex/repos/bci/outdir/speechBaseline4/OVAT_lrStart_0.02_run011"
+}
+batch 0, ctc loss: 5.045965, cer: 0.993933, time/batch:   0.005
+
+=====================================
+RUN 12: nLayers = 3
+=====================================
+{
+  "changed_param": "nLayers",
+  "value": 3,
+  "outputDir": "/lotterlab/users/alex/repos/bci/outdir/speechBaseline4/OVAT_nLayers_3_run012"
+}
+batch 0, ctc loss: 4.930951, cer: 0.946226, time/batch:   0.007
+
+=====================================
+RUN 13: nLayers = 4
+=====================================
+{
+  "changed_param": "nLayers",
+  "value": 4,
+  "outputDir": "/lotterlab/users/alex/repos/bci/outdir/speechBaseline4/OVAT_nLayers_4_run013"
+}

@@ -25,7 +25,7 @@ base_args = {
     'lrStart': 0.02,
     'lrEnd': 0.02,
     'nUnits': 1024,
-    'nBatch': 100,
+    'nBatch': 10000,
     'nLayers': 5,
     'seed': 0,
     'nClasses': 40,

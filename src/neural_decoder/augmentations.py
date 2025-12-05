@@ -4,6 +4,26 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+class TimeMask(nn.Module):
+    """
+    Masks a contiguous time segment of length mask_len.
+    Input: x of shape (B, T, C)
+    """
+    def __init__(self, mask_len):
+        super().__init__()
+        self.mask_len = mask_len
+
+    def forward(self, x):
+        B, T, C = x.shape
+        if self.mask_len <= 0 or self.mask_len >= T:
+            return x
+
+        # Choose random start
+        start = torch.randint(0, T - self.mask_len, (1,)).item()
+
+        # Mask the segment
+        x[:, start:start+self.mask_len, :] = 0
+        return x
 
 class WhiteNoise(nn.Module):
     def __init__(self, std=0.1):

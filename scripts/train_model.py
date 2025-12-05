@@ -35,6 +35,7 @@ args['strideLen'] = 4
 args['kernelLen'] = 32
 args['bidirectional'] = False
 args['l2_decay'] = 1e-5
+args['timeMaskLen'] = 20
 
 from neural_decoder.neural_decoder_trainer import trainModel
 import torch

@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 
 from .model import GRUDecoder
 from .dataset import SpeechDataset
-
+from .augmentations import TimeMask
 
 def getDatasetLoaders(
     datasetName,
@@ -123,6 +123,11 @@ def trainModel(args):
                 torch.randn([X.shape[0], 1, X.shape[2]], device=device)
                 * args["constantOffsetSD"]
             )
+        
+        if args["timeMaskLen"] > 0:
+            # X shape is (B, T, C)
+            time_mask = TimeMask(args["timeMaskLen"])
+            X = time_mask(X)
 
         # Compute prediction error
         pred = model.forward(X, dayIdx)
